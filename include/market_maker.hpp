@@ -33,6 +33,9 @@ public:
     // Расчет стоимости газа для сделки
     double calculate_gas_cost(double gas_price, double trade_size);
 
+    // Корректировка цены с учетом задержки
+    double adjust_price_with_latency(double S_t, double sigma, double latency);
+
     // Оценка интенсивности ордеров (k)
     double estimate_order_intensity(double bid, double ask, double bid_volume, double ask_volume);
 
