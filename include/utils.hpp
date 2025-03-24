@@ -4,12 +4,18 @@
 #include <cmath>
 #include <iostream>
 #include <ctime>
+#include <random>
 
 namespace utils {
     inline double log(double x) { return std::log(x); }
+    
+    // Улучшенная реализация нормального распределения с использованием Box-Muller transform
     inline double normal_dist(double mean, double stddev) {
-        // Простая заглушка для нормального распределения (можно улучшить с Boost)
-        return mean + stddev * (std::rand() / (RAND_MAX + 1.0) - 0.5);
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        static std::normal_distribution<double> dist(0, 1);
+        
+        return mean + stddev * dist(gen);
     }
 }
 

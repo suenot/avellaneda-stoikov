@@ -16,13 +16,11 @@ std::pair<double, double> MarketMaker::calculate_spreads(double S_t, double sigm
 
 std::pair<double, double> MarketMaker::adjust_spreads_for_onchain(double S_t, double delta_a, double delta_b,
                                                                  double latency, double sigma, double gas_cost) {
-    // Корректировка цены с учетом задержки (latency)
     double latency_adjustment = utils::normal_dist(0.0, sigma * std::sqrt(latency));
     double adjusted_S_t = S_t + latency_adjustment;
 
-    // Gas cost: переводим в ETH и учитываем как заметную корректировку спреда
-    double gas_penalty = (gas_cost / 1e18) * 100000;  // 50 Gwei * 100,000 gas = 0.005 ETH
-    double spread_adjustment = gas_penalty * 100;     // Увеличиваем влияние до ~0.5 единиц
+    double gas_penalty = (gas_cost / 1e18) * 100000;  // 0.005 ETH
+    double spread_adjustment = gas_penalty * 100;     // ~0.5 единиц
 
     double adjusted_delta_a = adjusted_S_t + (delta_a - S_t) + spread_adjustment;
     double adjusted_delta_b = adjusted_S_t - (S_t - delta_b) - spread_adjustment;
@@ -31,27 +29,26 @@ std::pair<double, double> MarketMaker::adjust_spreads_for_onchain(double S_t, do
 }
 
 void MarketMaker::step(double S_t, double sigma, double k, double latency, double gas_cost) {
-    // 1. Вычисляем базовые спреды A-S
     auto [delta_a, delta_b] = calculate_spreads(S_t, sigma, k, inventory_.get_inventory());
-
-    // 2. Адаптируем под onchain
     auto [adjusted_delta_a, adjusted_delta_b] = adjust_spreads_for_onchain(S_t, delta_a, delta_b, latency, sigma, gas_cost);
 
-    // 3. Симулируем сделку с учетом спредов
     double trade_size = 1.0;
-    double market_price = S_t + utils::normal_dist(0.0, sigma);  // Симулируем рыночную цену
-    bool is_buy = (market_price <= delta_b);  // Покупка, если цена ниже bid
-    bool is_sell = (market_price >= delta_a); // Продажа, если цена выше ask
+    double market_price = S_t + utils::normal_dist(0.0, sigma);
+    
+    // More aggressive trading conditions
+    bool is_buy = (market_price <= adjusted_delta_b);  // Changed from delta_b
+    bool is_sell = (market_price >= adjusted_delta_a); // Changed from delta_a
+    
     if (is_buy) {
         inventory_.update_inventory(trade_size, true);
     } else if (is_sell) {
         inventory_.update_inventory(trade_size, false);
     }
 
-    // 4. Выводим результат
     std::cout << "S_t: " << S_t
               << ", Inventory: " << inventory_.get_inventory()
               << ", Base Ask: " << delta_a << ", Base Bid: " << delta_b
               << ", Adjusted Ask: " << adjusted_delta_a << ", Adjusted Bid: " << adjusted_delta_b
+              << ", Market Price: " << market_price  // Добавляем для отладки
               << std::endl;
 }
