@@ -19,16 +19,19 @@ public:
                                                         double trade_size);
 
     // Симуляция шага маркет-мейкинга
-    void step(double S_t, double sigma, double k, double latency, double gas_cost, double trade_size);
+    void step(double S_t, double sigma, double latency, double gas_cost, double trade_size);
 
     // Получение данных с Binance (заглушка до реализации API)
-    std::pair<double, std::pair<double, double>> get_binance_data(const std::string& pair);
+    std::tuple<double, double, double, double, double> get_binance_data(const std::string& pair);
 
     // Получение onchain-метрик (заглушка до реализации web3)
     std::pair<double, double> get_onchain_metrics();
 
     // Вычисление волатильности из исторических данных
     double calculate_volatility(const std::vector<double>& prices, int window = 5);
+
+    // Оценка интенсивности ордеров (k)
+    double estimate_order_intensity(double bid, double ask, double bid_volume, double ask_volume);
 
 private:
     double gamma_;  // Коэффициент риска

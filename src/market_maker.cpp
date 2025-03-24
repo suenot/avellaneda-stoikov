@@ -7,23 +7,20 @@ MarketMaker::MarketMaker(double gamma, double T)
     : gamma_(gamma), T_(T), inventory_(0.0) {}
 
 std::pair<double, double> MarketMaker::calculate_spreads(double S_t, double sigma, double k, double q_t) {
-    // Классическая формула Avellaneda-Stoikov с ограничениями
+    // Точная формула Avellaneda-Stoikov
     double spread_term = (1.0 / gamma_) * utils::log(1.0 + gamma_ / k);
+    double inventory_term = q_t * sigma * sigma * T_;
     
-    // Ограничиваем влияние инвентаря и волатильности
-    const double max_inventory_impact = 1.5;
-    const double max_sigma = 0.3;
-    double bounded_q = std::clamp(q_t, -max_inventory_impact, max_inventory_impact);
-    double bounded_sigma = std::clamp(sigma, 0.01, max_sigma);
-    double inventory_term = bounded_q * bounded_sigma * bounded_sigma * (T_/2);  // Ослабляем влияние времени
-    
-    // Дополнительная проверка на разумность спреда
-    if (sigma > 0.2) {
-        spread_term *= 1.2;  // Увеличиваем базовый спред при высокой волатильности
-    }
-
     double delta_a = S_t + spread_term + inventory_term;  // Ask price
     double delta_b = S_t - spread_term - inventory_term;  // Bid price
+    
+    // Обеспечиваем минимальный спред 0.1% от цены
+    double min_spread = S_t * 0.001;
+    if (delta_a - delta_b < min_spread) {
+        double mid = (delta_a + delta_b) / 2;
+        delta_a = mid + min_spread/2;
+        delta_b = mid - min_spread/2;
+    }
 
     // Проверка на корректность спредов (delta_a должен быть больше delta_b)
     if (delta_a <= delta_b) {
@@ -57,7 +54,13 @@ std::pair<double, double> MarketMaker::adjust_spreads_for_onchain(double S_t, do
     return {adjusted_delta_a, adjusted_delta_b};
 }
 
-void MarketMaker::step(double S_t, double sigma, double k, double latency, double gas_cost, double trade_size) {
+void MarketMaker::step(double S_t, double sigma, double latency, double gas_cost, double trade_size) {
+    // Получаем данные с биржи
+    auto [mid_price, bid, ask, bid_volume, ask_volume] = get_binance_data("USD+/wETH");
+    
+    // Оцениваем интенсивность ордеров
+    double k = estimate_order_intensity(bid, ask, bid_volume, ask_volume);
+    
     // Получаем текущий инвентарь
     double current_inventory = inventory_.get_inventory();
     
@@ -66,7 +69,7 @@ void MarketMaker::step(double S_t, double sigma, double k, double latency, doubl
     auto [adjusted_delta_a, adjusted_delta_b] = adjust_spreads_for_onchain(S_t, delta_a, delta_b, latency, sigma, gas_cost, trade_size);
 
     // Генерация независимой рыночной цены (не зависит от reservation_price)
-    double market_price = S_t + utils::normal_dist(0.0, sigma);
+    double market_price = mid_price + utils::normal_dist(0.0, sigma);
     
     // Учет gas_cost при исполнении сделки
     double gas_penalty = (gas_cost * 100000 * trade_size) / 1e18;
@@ -116,19 +119,42 @@ void MarketMaker::step(double S_t, double sigma, double k, double latency, doubl
               << std::endl;
 }
 
-std::pair<double, std::pair<double, double>> MarketMaker::get_binance_data(const std::string& pair) {
-    // Заглушка: mid_price, bid, ask
+std::tuple<double, double, double, double, double> MarketMaker::get_binance_data(const std::string& pair) {
+    // Заглушка: mid_price, bid, ask, bid_volume, ask_volume
     // TODO: Подключить Binance API через libcurl или Boost
     double mid_price = 2000.0;
     double bid = mid_price - 1.0;
     double ask = mid_price + 1.0;
-    return {mid_price, {bid, ask}};
+    double bid_volume = 10.0;  // Объем на уровне bid
+    double ask_volume = 8.0;   // Объем на уровне ask
+    return {mid_price, bid, ask, bid_volume, ask_volume};
 }
 
 std::pair<double, double> MarketMaker::get_onchain_metrics() {
     // Заглушка: gas_price (wei), latency (seconds)
     // TODO: Подключить web3cpp для Infura/Alchemy
     return {50e9, 12.0};
+}
+
+double MarketMaker::estimate_order_intensity(double bid, double ask, double bid_volume, double ask_volume) {
+    // Рассчитываем k = (объем ордеров) / (ширина спреда)
+    double spread_width = ask - bid;
+    if (spread_width < 0.0001) spread_width = 0.0001;  // Защита от деления на 0
+    
+    // Используем средний объем в диапазоне ±1% от mid-price
+    double mid_price = (bid + ask) / 2;
+    double range_min = mid_price * 0.99;
+    double range_max = mid_price * 1.01;
+    
+    // В реальной реализации нужно учитывать объемы из стакана
+    // Здесь используем упрощенную модель
+    double total_volume = (bid_volume + ask_volume) / 2;
+    
+    // Интенсивность ордеров (k)
+    double k = total_volume / spread_width;
+    
+    // Ограничиваем k разумными пределами
+    return std::clamp(k, 0.1, 100.0);
 }
 
 double MarketMaker::calculate_volatility(const std::vector<double>& prices, int window) {
