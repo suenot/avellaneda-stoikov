@@ -7,9 +7,20 @@ MarketMaker::MarketMaker(double gamma, double T)
     : gamma_(gamma), T_(T), inventory_(0.0) {}
 
 std::pair<double, double> MarketMaker::calculate_spreads(double S_t, double sigma, double k, double q_t) {
-    // Классическая формула Avellaneda-Stoikov
+    // Классическая формула Avellaneda-Stoikov с ограничениями
     double spread_term = (1.0 / gamma_) * utils::log(1.0 + gamma_ / k);
-    double inventory_term = q_t * sigma * sigma * T_;
+    
+    // Ограничиваем влияние инвентаря и волатильности
+    const double max_inventory_impact = 1.5;
+    const double max_sigma = 0.3;
+    double bounded_q = std::clamp(q_t, -max_inventory_impact, max_inventory_impact);
+    double bounded_sigma = std::clamp(sigma, 0.01, max_sigma);
+    double inventory_term = bounded_q * bounded_sigma * bounded_sigma * (T_/2);  // Ослабляем влияние времени
+    
+    // Дополнительная проверка на разумность спреда
+    if (sigma > 0.2) {
+        spread_term *= 1.2;  // Увеличиваем базовый спред при высокой волатильности
+    }
 
     double delta_a = S_t + spread_term + inventory_term;  // Ask price
     double delta_b = S_t - spread_term - inventory_term;  // Bid price

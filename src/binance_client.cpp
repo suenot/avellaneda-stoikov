@@ -2,8 +2,10 @@
 #include <iostream>
 #include <thread>
 
-BinanceClient::BinanceClient(net::io_context& ioc) 
-    : ioc_(ioc), ws_(net::make_strand(ioc)) {}
+BinanceClient::BinanceClient(net::io_context& ioc)
+    : ioc_(ioc),
+      ws_(net::make_strand(ioc)),
+      connection_timer_(net::make_strand(ioc)) {}
 
 void BinanceClient::connect_and_subscribe(const std::string& symbol, MarketDataCallback callback) {
     callback_ = callback;
@@ -29,23 +31,48 @@ void BinanceClient::connect_and_subscribe(const std::string& symbol, MarketDataC
 }
 
 void BinanceClient::run(const std::string& host, const std::string& port) {
-    // Разрешаем доменное имя
+    auto on_fail = [this, host, port](beast::error_code ec, const std::string& msg) {
+        std::cerr << "Binance connection error (" << msg << "): " << ec.message() << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        run(host, port); // Переподключение через 5 секунд
+    };
+
     tcp::resolver resolver(ioc_);
     beast::get_lowest_layer(ws_).async_connect(
         resolver.resolve(host, port),
-        [this](beast::error_code ec, tcp::resolver::results_type::endpoint_type) {
-            if(ec) {
-                std::cerr << "Connect error: " << ec.message() << std::endl;
-                return;
-            }
+        [this, on_fail](beast::error_code ec, tcp::resolver::results_type::endpoint_type) {
+            if(ec) return on_fail(ec, "connect");
             
-            // Устанавливаем WebSocket соединение
+            // SSL handshake
+            beast::get_lowest_layer(ws_).socket().set_option(
+                net::socket_base::keep_alive(true));
+            
+            // WebSocket handshake
             ws_.async_handshake(
                 host_, "/ws",
+                [this, on_fail](beast::error_code ec) {
+                    if(ec) return on_fail(ec, "handshake");
+                    
+                    // Запускаем таймер проверки соединения
+                    start_connection_check();
+                });
+        });
+}
+
+void BinanceClient::start_connection_check() {
+    connection_timer_.expires_after(std::chrono::seconds(30));
+    connection_timer_.async_wait(
+        [this](beast::error_code ec) {
+            if(ec) return;
+            
+            // Отправляем ping
+            ws_.async_ping({},
                 [this](beast::error_code ec) {
                     if(ec) {
-                        std::cerr << "Handshake error: " << ec.message() << std::endl;
-                        return;
+                        std::cerr << "Connection lost, reconnecting..." << std::endl;
+                        run(host_, port_);
+                    } else {
+                        start_connection_check();
                     }
                 });
         });
