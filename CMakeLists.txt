@@ -6,8 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(include)
 
-# Находим Boost для работы с сетью (для Binance API)
-find_package(Boost COMPONENTS system REQUIRED)
+# Находим Boost (Beast для WebSocket)
+find_package(Boost 1.70.0 COMPONENTS system REQUIRED)
+find_package(nlohmann_json 3.11.2 REQUIRED)
+
 # Позже можно добавить web3cpp для onchain-данных
 # find_package(web3cpp) # Раскомментировать, когда добавите web3cpp
 
