@@ -25,8 +25,10 @@ add_executable(market_maker
 )
 
 # Подключаем библиотеки
+find_package(gym REQUIRED)
 target_link_libraries(market_maker
     Boost::system
     ${nlohmann_json_LIBRARIES}
+    gym::gym
 )
 # target_link_libraries(market_maker web3cpp) # Раскомментировать позже
