@@ -3,11 +3,11 @@
 #include <iostream>
 
 int main() {
-    MarketMaker mm(0.1, 30.0);  // gamma = 0.1, T = 30 seconds
+    MarketMaker mm(0.1, 10.0);  // T reduced to 10 to reduce inventory impact
 
     double S_t = 2000.0;
-    double sigma = 0.2;   // Increased volatility to 20%
-    double k = 10.0;      // Increased order intensity
+    double sigma = 0.1;   // Reduced to 10% for more realistic volatility
+    double k = 10.0;
     double latency = 12.0;
     double gas_cost = 50e9;
 

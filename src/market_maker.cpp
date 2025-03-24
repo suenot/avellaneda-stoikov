@@ -19,11 +19,11 @@ std::pair<double, double> MarketMaker::adjust_spreads_for_onchain(double S_t, do
     double latency_adjustment = utils::normal_dist(0.0, sigma * std::sqrt(latency));
     double adjusted_S_t = S_t + latency_adjustment;
 
-    double gas_penalty = (gas_cost / 1e18) * 10000;  // 0.0005 ETH
-    double spread_adjustment = gas_penalty * 10;     // ~0.5 единиц
+    double gas_penalty = (gas_cost / 1e18) * 100000;  // 0.005 ETH
+    double spread_adjustment = gas_penalty * 100;     // ~0.5 единиц
 
-    double adjusted_delta_a = adjusted_S_t + (delta_a - S_t) + spread_adjustment;
-    double adjusted_delta_b = adjusted_S_t - (S_t - delta_b) - spread_adjustment;
+    double adjusted_delta_a = delta_a + spread_adjustment + latency_adjustment;
+    double adjusted_delta_b = delta_b - spread_adjustment + latency_adjustment;
 
     return {adjusted_delta_a, adjusted_delta_b};
 }
@@ -35,9 +35,9 @@ void MarketMaker::step(double S_t, double sigma, double k, double latency, doubl
     double trade_size = 1.0;
     double market_price = S_t + utils::normal_dist(0.0, sigma);
     
-    // More aggressive trading conditions
-    bool is_buy = (market_price <= adjusted_delta_b);  // Changed from delta_b
-    bool is_sell = (market_price >= adjusted_delta_a); // Changed from delta_a
+    // Use base spreads for trading conditions to increase trade frequency
+    bool is_buy = (market_price <= delta_b);  // Changed to base spread
+    bool is_sell = (market_price >= delta_a); // Changed to base spread
     
     if (is_buy) {
         inventory_.update_inventory(trade_size, true);
@@ -49,6 +49,6 @@ void MarketMaker::step(double S_t, double sigma, double k, double latency, doubl
               << ", Inventory: " << inventory_.get_inventory()
               << ", Base Ask: " << delta_a << ", Base Bid: " << delta_b
               << ", Adjusted Ask: " << adjusted_delta_a << ", Adjusted Bid: " << adjusted_delta_b
-              << ", Market Price: " << market_price  // Добавляем для отладки
+              << ", Market Price: " << market_price
               << std::endl;
 }
