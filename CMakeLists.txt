@@ -21,6 +21,7 @@ add_executable(market_maker
     src/market_maker.cpp
     src/inventory_manager.cpp
     src/binance_client.cpp
+    src/market_making_env.cpp
 )
 
 # Подключаем библиотеки
