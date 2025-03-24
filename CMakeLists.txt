@@ -24,11 +24,29 @@ add_executable(market_maker
     src/market_making_env.cpp
 )
 
+# Находим PyTorch
+find_package(Torch REQUIRED)
+
 # Подключаем библиотеки
 find_package(gym REQUIRED)
 target_link_libraries(market_maker
     Boost::system
     ${nlohmann_json_LIBRARIES}
     gym::gym
+    ${TORCH_LIBRARIES}
+)
+
+# Добавляем PPO trainer
+add_executable(ppo_trainer
+    src/ppo_trainer.cpp
+    src/market_making_env.cpp
+    src/market_maker.cpp
+    src/inventory_manager.cpp
+    src/binance_client.cpp
+)
+target_link_libraries(ppo_trainer
+    ${TORCH_LIBRARIES}
+    Boost::system
+    ${nlohmann_json_LIBRARIES}
 )
 # target_link_libraries(market_maker web3cpp) # Раскомментировать позже
