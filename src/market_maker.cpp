@@ -67,6 +67,21 @@ void MarketMaker::step(double S_t, double sigma, double latency, double gas_cost
     auto [delta_a, delta_b] = calculate_spreads(S_t, sigma, k, current_inventory);
     auto [adjusted_delta_a, adjusted_delta_b] = adjust_spreads_for_onchain(S_t, delta_a, delta_b, latency, sigma, gas_cost, trade_size);
 
+    // Корректировка спредов под PMM-пулы
+    std::pair<double, double> MarketMaker::adjust_spreads_for_pmm(double S_t, double delta_a, double delta_b, double pool_depth) {
+        // Упрощенная модель PMM: корректируем спреды в зависимости от глубины пула
+        const double MIN_POOL_DEPTH = 10.0;  // Минимальная значимая глубина пула
+        double depth_factor = std::max(pool_depth, MIN_POOL_DEPTH) / MIN_POOL_DEPTH;
+        
+        // Уменьшаем спреды при большей глубине пула
+        double spread_reduction = 1.0 / std::sqrt(depth_factor);
+        double mid_price = (delta_a + delta_b) / 2;
+        double new_delta_a = mid_price + (delta_a - mid_price) * spread_reduction;
+        double new_delta_b = mid_price - (mid_price - delta_b) * spread_reduction;
+        
+        return {new_delta_a, new_delta_b};
+    }
+
     // Корректировка цены с учетом задержки
     double MarketMaker::adjust_price_with_latency(double S_t, double sigma, double latency) {
         // Моделируем случайное изменение цены из-за задержки

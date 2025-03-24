@@ -36,6 +36,9 @@ public:
     // Корректировка цены с учетом задержки
     double adjust_price_with_latency(double S_t, double sigma, double latency);
 
+    // Корректировка спредов под PMM-пулы
+    std::pair<double, double> adjust_spreads_for_pmm(double S_t, double delta_a, double delta_b, double pool_depth);
+
     // Оценка интенсивности ордеров (k)
     double estimate_order_intensity(double bid, double ask, double bid_volume, double ask_volume);
 
