@@ -36,6 +36,7 @@ public:
 private:
     net::io_context& ioc_;
     websocket::stream<beast::tcp_stream> ws_;
+    beast::flat_buffer buffer_;
     std::string host_ = "stream.binance.com";
     std::string port_ = "9443";
     MarketDataCallback callback_;
