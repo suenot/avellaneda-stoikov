@@ -38,8 +38,21 @@ std::tuple<std::vector<double>, double, bool> MarketMakingEnv::step(const std::a
     current_step_++;
     bool done = (current_step_ >= max_steps_);
     
-    // Calculate reward (placeholder)
-    double reward = current_profit_ - std::abs(current_inventory_) * 0.1;
+    // Track executed trades and update profit
+    auto [mid_price, bid, ask, bid_vol, ask_vol] = mm_.get_binance_data("USD+/wETH");
+    auto [gas_price, latency] = mm_.get_onchain_metrics();
+    
+    // Calculate profit from last step (simplified)
+    double spread_profit = (ask - bid) * 0.1; // 10% of spread as profit estimate
+    current_profit_ += spread_profit;
+    
+    // Calculate reward components
+    double profit_term = current_profit_;
+    double inventory_risk = std::abs(current_inventory_) * sigma_ * 0.5; // Risk proportional to volatility
+    double gas_cost = mm_.calculate_gas_cost(gas_price, volume_a + volume_b);
+    
+    // Final reward
+    double reward = profit_term - inventory_risk - gas_cost;
     
     return {get_state(), reward, done};
 }
