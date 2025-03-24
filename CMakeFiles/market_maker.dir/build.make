@@ -127,6 +127,7 @@ market_maker: CMakeFiles/market_maker.dir/src/main.cpp.o
 market_maker: CMakeFiles/market_maker.dir/src/market_maker.cpp.o
 market_maker: CMakeFiles/market_maker.dir/src/inventory_manager.cpp.o
 market_maker: CMakeFiles/market_maker.dir/build.make
+market_maker: /opt/homebrew/lib/libboost_system-mt.dylib
 market_maker: CMakeFiles/market_maker.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/suenot/work_dev_3/avellaneda-stoikov/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable market_maker"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/market_maker.dir/link.txt --verbose=$(VERBOSE)
