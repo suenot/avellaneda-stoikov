@@ -49,4 +49,16 @@ target_link_libraries(ppo_trainer
     Boost::system
     ${nlohmann_json_LIBRARIES}
 )
+
+# Добавляем симулятор
+add_executable(market_simulator
+    src/market_simulator.cpp
+    src/market_maker.cpp
+    src/inventory_manager.cpp
+    src/binance_client.cpp
+)
+target_link_libraries(market_simulator
+    Boost::system
+    ${nlohmann_json_LIBRARIES}
+)
 # target_link_libraries(market_maker web3cpp) # Раскомментировать позже
