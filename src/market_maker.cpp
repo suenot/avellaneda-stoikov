@@ -19,8 +19,8 @@ std::pair<double, double> MarketMaker::adjust_spreads_for_onchain(double S_t, do
     double latency_adjustment = utils::normal_dist(0.0, sigma * std::sqrt(latency));
     double adjusted_S_t = S_t + latency_adjustment;
 
-    double gas_penalty = (gas_cost / 1e18) * 100000;  // 0.005 ETH
-    double spread_adjustment = gas_penalty * 100;     // ~0.5 единиц
+    double gas_penalty = (gas_cost / 1e18) * 10000;  // 0.0005 ETH
+    double spread_adjustment = gas_penalty * 10;     // ~0.5 единиц
 
     double adjusted_delta_a = adjusted_S_t + (delta_a - S_t) + spread_adjustment;
     double adjusted_delta_b = adjusted_S_t - (S_t - delta_b) - spread_adjustment;
