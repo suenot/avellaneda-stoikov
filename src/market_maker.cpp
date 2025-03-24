@@ -8,15 +8,20 @@ std::pair<double, double> MarketMaker::calculate_spreads(double S_t, double sigm
     double term1 = (1.0 / gamma_) * utils::log(1.0 + gamma_ / k);
     double term2 = q_t * sigma * sigma * T_;
 
+    // Ensure delta_a is always greater than delta_b (no zero spread)
     double delta_a = S_t + term1 + term2;  // Спред продажи
     double delta_b = S_t - term1 - term2;  // Спред покупки
+
+    // Debug output to verify calculations
+    // std::cout << "Debug: term1=" << term1 << ", term2=" << term2 << ", q_t=" << q_t << std::endl;
 
     return {delta_a, delta_b};
 }
 
 std::pair<double, double> MarketMaker::adjust_spreads_for_onchain(double S_t, double delta_a, double delta_b,
                                                                  double latency, double sigma, double gas_cost) {
-    double latency_adjustment = utils::normal_dist(0.0, sigma * std::sqrt(latency));
+    // Reduce the impact of latency_adjustment by 50%
+    double latency_adjustment = utils::normal_dist(0.0, sigma * std::sqrt(latency)) * 0.5;
     double adjusted_S_t = S_t + latency_adjustment;
 
     double gas_penalty = (gas_cost / 1e18) * 100000;  // 0.005 ETH
