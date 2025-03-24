@@ -85,12 +85,12 @@ clean: CMakeFiles/market_maker.dir/clean
 CMakeFiles/market_maker.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/market_maker.dir/build.make CMakeFiles/market_maker.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/market_maker.dir/build.make CMakeFiles/market_maker.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/suenot/work_dev_3/avellaneda-stoikov/build/CMakeFiles --progress-num=1,2,3,4 "Built target market_maker"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/suenot/work_dev_3/avellaneda-stoikov/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target market_maker"
 .PHONY : CMakeFiles/market_maker.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/market_maker.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/suenot/work_dev_3/avellaneda-stoikov/build/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/suenot/work_dev_3/avellaneda-stoikov/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/market_maker.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/suenot/work_dev_3/avellaneda-stoikov/build/CMakeFiles 0
 .PHONY : CMakeFiles/market_maker.dir/rule

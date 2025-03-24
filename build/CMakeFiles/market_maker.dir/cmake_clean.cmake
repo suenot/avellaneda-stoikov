@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/market_maker.dir/src/binance_client.cpp.o"
+  "CMakeFiles/market_maker.dir/src/binance_client.cpp.o.d"
   "CMakeFiles/market_maker.dir/src/inventory_manager.cpp.o"
   "CMakeFiles/market_maker.dir/src/inventory_manager.cpp.o.d"
   "CMakeFiles/market_maker.dir/src/main.cpp.o"

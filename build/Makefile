@@ -129,6 +129,30 @@ market_maker/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/market_maker.dir/build.make CMakeFiles/market_maker.dir/build
 .PHONY : market_maker/fast
 
+src/binance_client.o: src/binance_client.cpp.o
+.PHONY : src/binance_client.o
+
+# target to build an object file
+src/binance_client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/market_maker.dir/build.make CMakeFiles/market_maker.dir/src/binance_client.cpp.o
+.PHONY : src/binance_client.cpp.o
+
+src/binance_client.i: src/binance_client.cpp.i
+.PHONY : src/binance_client.i
+
+# target to preprocess a source file
+src/binance_client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/market_maker.dir/build.make CMakeFiles/market_maker.dir/src/binance_client.cpp.i
+.PHONY : src/binance_client.cpp.i
+
+src/binance_client.s: src/binance_client.cpp.s
+.PHONY : src/binance_client.s
+
+# target to generate assembly for a file
+src/binance_client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/market_maker.dir/build.make CMakeFiles/market_maker.dir/src/binance_client.cpp.s
+.PHONY : src/binance_client.cpp.s
+
 src/inventory_manager.o: src/inventory_manager.cpp.o
 .PHONY : src/inventory_manager.o
 
@@ -210,6 +234,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... market_maker"
+	@echo "... src/binance_client.o"
+	@echo "... src/binance_client.i"
+	@echo "... src/binance_client.s"
 	@echo "... src/inventory_manager.o"
 	@echo "... src/inventory_manager.i"
 	@echo "... src/inventory_manager.s"

@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Users/suenot/work_dev_3/avellaneda-stoikov/src/binance_client.cpp" "CMakeFiles/market_maker.dir/src/binance_client.cpp.o" "gcc" "CMakeFiles/market_maker.dir/src/binance_client.cpp.o.d"
   "/Users/suenot/work_dev_3/avellaneda-stoikov/src/inventory_manager.cpp" "CMakeFiles/market_maker.dir/src/inventory_manager.cpp.o" "gcc" "CMakeFiles/market_maker.dir/src/inventory_manager.cpp.o.d"
   "/Users/suenot/work_dev_3/avellaneda-stoikov/src/main.cpp" "CMakeFiles/market_maker.dir/src/main.cpp.o" "gcc" "CMakeFiles/market_maker.dir/src/main.cpp.o.d"
   "/Users/suenot/work_dev_3/avellaneda-stoikov/src/market_maker.cpp" "CMakeFiles/market_maker.dir/src/market_maker.cpp.o" "gcc" "CMakeFiles/market_maker.dir/src/market_maker.cpp.o.d"
