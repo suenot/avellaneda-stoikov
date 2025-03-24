@@ -44,8 +44,8 @@ std::pair<double, double> MarketMaker::adjust_spreads_for_onchain(double S_t, do
     double latency_adjustment = utils::normal_dist(0.0, sigma * std::sqrt(latency));
     double adjusted_S_t = S_t + latency_adjustment;
 
-    // Gas cost пропорционален объему сделки (100,000 gas за ордер)
-    double gas_penalty = (gas_cost * 100000 * trade_size) / 1e18; // В ETH, затем в единицы цены
+    // Учет gas costs (используем отдельную функцию расчета)
+    double gas_penalty = calculate_gas_cost(gas_cost, trade_size);
 
     // Применяем latency_adjustment к обоим спредам
     double adjusted_delta_a = delta_a + latency_adjustment;
@@ -67,6 +67,13 @@ void MarketMaker::step(double S_t, double sigma, double latency, double gas_cost
     // Рассчитываем спреды на основе текущих рыночных условий и инвентаря
     auto [delta_a, delta_b] = calculate_spreads(S_t, sigma, k, current_inventory);
     auto [adjusted_delta_a, adjusted_delta_b] = adjust_spreads_for_onchain(S_t, delta_a, delta_b, latency, sigma, gas_cost, trade_size);
+
+    // Расчет стоимости газа для сделки
+    double MarketMaker::calculate_gas_cost(double gas_price, double trade_size) {
+        // Gas cost = gas_price * gas_limit * trade_size
+        const double GAS_LIMIT_PER_ORDER = 100000;  // Примерное значение gas limit для ордера
+        return (gas_price * GAS_LIMIT_PER_ORDER * trade_size) / 1e18;  // Конвертируем wei в ETH
+    }
 
     // Генерация независимой рыночной цены (не зависит от reservation_price)
     double market_price = mid_price + utils::normal_dist(0.0, sigma);

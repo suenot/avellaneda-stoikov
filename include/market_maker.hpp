@@ -30,6 +30,9 @@ public:
     // Вычисление волатильности из исторических данных
     double calculate_volatility(const std::vector<double>& prices, int window = 5);
 
+    // Расчет стоимости газа для сделки
+    double calculate_gas_cost(double gas_price, double trade_size);
+
     // Оценка интенсивности ордеров (k)
     double estimate_order_intensity(double bid, double ask, double bid_volume, double ask_volume);
 
